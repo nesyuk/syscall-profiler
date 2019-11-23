@@ -7,6 +7,7 @@ LD_DIR := /usr/local/lib
 TARGET_DIR := $(LD_DIR)/opprofiler
 TARGET_LIB_SONAME := libopprofiler.so.1
 TARGET_LIB := $(TARGET_LIB_SONAME).0.1
+TEST_DIR := test
 
 .PHONY: all
 
@@ -18,6 +19,18 @@ lib:	$(LIB_DIR)/opprofiler.c $(LIB_DIR)/opprofiler.h
 
 install:	$(TARGET_DIR)/$(TARGET_LIB)
 	ldconfig -n $(TARGET_DIR)
+
+.PHONY: test
+test:	test_install test_run test_clean
+
+test_install:
+	$(CC) $(TEST_DIR)/test_opprofiler.c -o $(TEST_DIR)/testopprofiler
+
+test_run:
+	-$(TEST_DIR)/testopprofiler
+
+test_clean:
+	-rm $(TEST_DIR)/testopprofiler
 
 .PHONY: clean
 clean:
