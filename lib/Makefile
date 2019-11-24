@@ -1,7 +1,7 @@
 SHELL = /bin/sh
 
 CC := gcc
-LDFLAGS := -shared -fPIC -Wl,-soname,
+LDFLAGS := -shared -fPIC -ldl -Wl,-soname,
 LIB_DIR := profiler
 LD_DIR := /usr/local/lib
 TARGET_DIR := $(LD_DIR)/opprofiler
@@ -27,7 +27,7 @@ test_install:
 	$(CC) $(TEST_DIR)/test_opprofiler.c -o $(TEST_DIR)/testopprofiler
 
 test_run:
-	-$(TEST_DIR)/testopprofiler
+	-LD_PRELOAD=$(TARGET_DIR)/$(TARGET_LIB) ./$(TEST_DIR)/testopprofiler
 
 test_clean:
 	-rm $(TEST_DIR)/testopprofiler
