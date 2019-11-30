@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 
+#include "opslib.h"
 #include "stats_mem.h"
 
 void stats_add_malloc(void *ptr, size_t size);
