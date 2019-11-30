@@ -10,5 +10,6 @@
 #include <unistd.h>
 
 #include "opslib.h"
+#include "stats.h"
 
 #endif
