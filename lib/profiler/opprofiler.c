@@ -31,7 +31,9 @@ int open(const char *pathname, int flags, ...){
                 mode = va_arg (arg, int);
                 va_end (arg);
         }
-	return __open(pathname, flags, mode);
+	int fd = __open(pathname, flags, mode);
+	stats_open(fd);
+	return fd;
 }
 
 int close(int fd){

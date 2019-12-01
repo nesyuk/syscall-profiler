@@ -75,6 +75,24 @@ void __log_alloc(){
 	log_stats(buf);
 }
 
+void __log_fd(){
+	struct stat_fd *cur = stats_fd_head;
+	char buf[256];
+	sprintf(buf, "fd:\t| open (times)\t| read (bytes)\t| write (bytes)\t| close(times)\t|\n");
+	log_stats(buf);
+	sprintf(buf, "------- |-------------- |-------------- |-------------- |-------------- |\n");
+	log_stats(buf);
+	while(cur != NULL){
+		if(cur->open != cur->close){
+			sprintf(buf, "%d\t| %ld\t\t| %lld\t\t| %lld\t\t| %ld\t\t|\n", cur->fd, cur->open, cur->read, cur->write, cur->close);
+			log_stats(buf);
+		}
+		cur = cur->next;
+	}
+	sprintf(buf, "\n");
+	log_stats(buf);
+}
+
 void stats_malloc(void *ptr, size_t size){
 	if (!ptr)
 		return;
@@ -140,6 +158,7 @@ void stats_open(int fd){
 		fd_stat->open += 1;
 	} else {
 		__append_fd();
+		stats_fd_head->fd = fd;
 		stats_fd_head->open += 1;
 	}
 	fd_open += 1;
@@ -171,4 +190,5 @@ void stats_close(int fd){
 		fd_stat->close += 1;
 		fd_close += 1;
 	}
+	__log_fd();
 }
