@@ -2,7 +2,7 @@
 #define TEST_OPPROFILER
 
 #define MIN_NUM_SYSCALLS 1
-#define MAX_NUM_SYSCALLS 300
+#define MAX_NUM_SYSCALLS 50
 #define OPS_SIZE (size_t) 8
 
 #define MIN_ALLOC_NMEM (size_t) 1
@@ -38,9 +38,6 @@ static bool test_open(void);
 static bool test_read(void);
 static bool test_write(void);
 static bool test_close(void);
-
-static void run(int);
-static void cleanup();
 
 static inline void exit_with_error(const char *err_source){
         perror(err_source);

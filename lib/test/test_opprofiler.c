@@ -8,6 +8,11 @@ static unsigned int allocated_memory_count = 0;
 static int *opened_files_list;
 static size_t opened_files_count = 0;
 
+static void run_tests(int syscalls_num);
+static void test_alloc();
+static void test_rand(int num_of_syscalls);
+static void cleanup(int num_of_syscalls);
+
 int main(int argc, char **argv){
 
 	if (argc > 1 && (!isdigit(*argv[1]) || atoi(argv[1]) < 0)){
@@ -15,22 +20,45 @@ int main(int argc, char **argv){
 		return 0;
 	}
 
-	srand(time(0));
-	int const num_of_syscalls = (argc > 1) ? atoi(argv[1]) : get_rand(MIN_NUM_SYSCALLS, MAX_NUM_SYSCALLS);
-
-	allocated_memory_list = alloca(num_of_syscalls*sizeof(void*));
-	opened_files_list = (int *) alloca(num_of_syscalls*sizeof(int));
-
-	run(num_of_syscalls);
-	cleanup();
+	int const num_of_syscalls = (argc > 1) ? atoi(argv[1]) : -1;
+	run_tests(num_of_syscalls);
 
 	return 0;
 }
 
-static void run(int num_of_syscalls){
+static void run_tests(int syscalls_num){
 	print_headline_separator();
-	printf("Running tests for %d syscalls:\n", num_of_syscalls);
+        printf("Tests *alloc:\n");
+        print_headline_separator();
+
+	test_alloc();
+
+	srand(time(0));
+        int const num_of_syscalls = (syscalls_num >= 0) ? syscalls_num : get_rand(MIN_NUM_SYSCALLS, MAX_NUM_SYSCALLS);
+
 	print_headline_separator();
+        printf("Tests random %d syscalls:\n", num_of_syscalls);
+        print_headline_separator();
+
+	test_rand(num_of_syscalls);
+}
+
+static void test_alloc(){
+	allocated_memory_list = alloca(5*sizeof(void*));
+	test_malloc();
+	test_malloc();
+	test_calloc();
+	test_realloc();
+	test_free();
+	test_free();
+	test_free();
+	cleanup(5);
+}
+
+static void test_rand(int num_of_syscalls){
+
+        allocated_memory_list = alloca(num_of_syscalls*sizeof(void*));
+        opened_files_list = (int *) alloca(num_of_syscalls*sizeof(int));
 
 	for (int i = 0; i < num_of_syscalls; i++){
 		printf("[%d] ", i);
@@ -39,8 +67,8 @@ static void run(int num_of_syscalls){
 			int random_op_idx = rand() % OPS_SIZE;
 			op_allowed = (*test_ops[random_op_idx])();
 		}
-		print_line_separator();
 	}
+	cleanup(num_of_syscalls);
 }
 
 static void cleanup(int num_of_syscalls){
@@ -67,6 +95,7 @@ static bool test_malloc(void){
 	if (ptr == NULL)
 		exit_with_error("malloc");
 	allocated_memory_list[allocated_memory_count++] = ptr;
+	print_line_separator();
 	return 1;
 }
 
@@ -80,6 +109,7 @@ static bool test_calloc(void){
 	if (ptr == NULL)
 		exit_with_error("calloc");
 	allocated_memory_list[allocated_memory_count++] = ptr;
+	print_line_separator();
 	return 1;
 }
 
@@ -94,6 +124,7 @@ static bool test_realloc(void){
 	if (ptr == NULL)
 		exit_with_error("realloc");
 	allocated_memory_list[allocated_memory_count-1] = ptr;
+	print_line_separator();
 	return 1;
 }
 
@@ -104,6 +135,7 @@ static bool test_free(void){
 
 	free(allocated_memory_list[allocated_memory_count-1]);
 	allocated_memory_list[--allocated_memory_count] = 0;
+	print_line_separator();
 	return 1;
 }
 
@@ -120,6 +152,7 @@ static bool test_open(void){
 
 	int fd = open(filename, O_RDWR|O_CREAT, FILE_PERM);
 	opened_files_list[opened_files_count++] = fd;
+	print_line_separator();
 	return 1;
 }
 
@@ -132,7 +165,7 @@ static bool test_read(void){
 	char buf[buf_size];
 	size_t bytes = read(opened_files_list[opened_files_count-1], &buf, buf_size);
 	printf("Read %ld bytes from file\n", bytes);
-
+	print_line_separator();
 	return 1;
 }
 
@@ -146,6 +179,7 @@ static bool test_write(void){
 	populate_buffer(buf, buf_size);
 	size_t bytes = write(opened_files_list[opened_files_count-1], &buf, buf_size);
 	printf("Wrote %ld bytes to file\n", bytes);
+	print_line_separator();
 	return 1;
 }
 
@@ -157,5 +191,6 @@ static bool test_close(void){
 	close(opened_files_list[opened_files_count-1]);
 	opened_files_list[--opened_files_count] = 0;
 	remove_test_file(opened_files_count);
+	print_line_separator();
 	return 1;
 }

@@ -23,9 +23,8 @@ pre_install:
 
 install:	install_stats opslib.o opprofiler.o logger.o
 
-install_stats:	$(LIB_DIR)/stats.c $(LIB_DIR)/stats.h $(LIB_DIR)/stats_mem.c $(LIB_DIR)/stats_mem.h
+install_stats:	$(LIB_DIR)/stats.c $(LIB_DIR)/stats.h
 	$(CC) $(CFLAGS) $(LIB_DIR)/stats.c -o $(TARGET_DIR)/stats.o
-	$(CC) $(CFLAGS) $(LIB_DIR)/stats_mem.c -o $(TARGET_DIR)/stats_mem.o
 
 opprofiler.o:	$(LIB_DIR)/opprofiler.c $(LIB_DIR)/opprofiler.h
 	$(CC) $(CFLAGS) $(LIB_DIR)/opprofiler.c -o $(TARGET_DIR)/opprofiler.o
