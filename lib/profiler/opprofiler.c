@@ -35,13 +35,20 @@ int open(const char *pathname, int flags, ...){
 }
 
 int close(int fd){
-	return __close(fd);
+	int result =  __close(fd);
+	//TODO: log error if result != 0
+	stats_close(fd);
+	return result;
 }
 
 ssize_t read(int fd, void *buf, size_t count){
-	return __read(fd, buf, count);
+	size_t bytes = __read(fd, buf, count);
+	stats_read(fd, bytes);
+	return bytes;
 }
 
 ssize_t write(int fd, const void *buf, size_t count){
-	return __write(fd, buf, count);
+	size_t bytes = __write(fd, buf, count);
+	stats_write(fd, bytes);
+	return bytes;
 }

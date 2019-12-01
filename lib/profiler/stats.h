@@ -17,9 +17,22 @@ struct stat_mem_alloc {
         struct stat_mem_alloc *next;
 };
 
+struct stat_fd {
+        int fd;
+        size_t open;
+        unsigned long long read;
+        unsigned long long write;
+	size_t close;
+	struct stat_fd *next;
+};
+
 void stats_add_malloc(void *ptr, size_t size);
 void stats_add_calloc(void *ptr, size_t nmemb, size_t size);
 void stats_add_realloc(void *prev, void *cur, size_t size);
 void stats_free(void *ptr);
+void stats_open(int fd);
+void stats_read(int fd, size_t size);
+void stats_write(int fd, size_t size);
+void stats_close(int fd);
 
 #endif

@@ -3,6 +3,9 @@
 static unsigned long long free_count = 0;
 static unsigned long long alloc_count  = 0;
 static struct stat_mem_alloc *stats_mem_head;
+static unsigned long long fd_open = 0;
+static unsigned long long fd_close = 0;
+static struct stat_fd *stats_fd_head;
 
 struct stat_mem_alloc* find_mem(void *ptr){
 	struct stat_mem_alloc *cur = stats_mem_head;
@@ -14,6 +17,16 @@ struct stat_mem_alloc* find_mem(void *ptr){
         return false;
 }
 
+struct stat_fd* find_fd(int fd){
+        struct stat_fd *cur = stats_fd_head;
+        while(cur != NULL){
+                if (cur->fd == fd)
+                        return cur;
+                cur = cur->next;
+        }
+        return false;
+}
+
 void append_mem(){
 	if (!stats_mem_head){
 		stats_mem_head = __malloc(sizeof(struct stat_mem_alloc));
@@ -22,6 +35,24 @@ void append_mem(){
 	struct stat_mem_alloc *mem = __malloc(sizeof(struct stat_mem_alloc));
 	mem->next = stats_mem_head;
 	stats_mem_head = mem;
+}
+
+void append_fd(){
+	if (!stats_fd_head){
+		stats_fd_head = __malloc(sizeof(struct stat_fd));
+		stats_fd_head->next = NULL;
+		stats_fd_head->open = 0;
+		stats_fd_head->read = 0;
+		stats_fd_head->write = 0;
+		stats_fd_head->close = 0;
+	}
+	struct stat_fd *new_fd = __malloc(sizeof(struct stat_fd));
+	new_fd->next = stats_fd_head;
+	new_fd->open = 0;
+	new_fd->read = 0;
+	new_fd->write = 0;
+	new_fd->close = 0;
+	stats_fd_head = new_fd;
 }
 
 void stats_add_malloc(void *ptr, size_t size){
@@ -78,4 +109,46 @@ void stats_free(void *ptr){
 		free_count += mem->last_size;
 		mem->free_size += mem->last_size;
 	}
+}
+
+void stats_open(int fd){
+	if(fd < 0)
+		return;
+	struct stat_fd *fd_stat = find_fd(fd);
+	if (fd_stat){
+		fd_stat->open += 1;
+	} else {
+		append_fd();
+		stats_fd_head->open += 1;
+	}
+	fd_open += 1;
+}
+
+void stats_read(int fd, size_t size){
+	if(fd < 0)
+		return;
+	struct stat_fd *fd_stat = find_fd(fd);
+	if(fd_stat){
+		fd_stat->read += size;
+	}
+}
+
+void stats_write(int fd, size_t size){
+	if(fd < 0)
+		return;
+	struct stat_fd *fd_stat = find_fd(fd);
+	if(fd_stat){
+		fd_stat->write += size;
+	}
+}
+
+void stats_close(int fd){
+	if(fd < 0)
+		return;
+	struct stat_fd *fd_stat = find_fd(fd);
+	if(fd_stat){
+		fd_stat->close += 1;
+		fd_close += 1;
+	}
+
 }
