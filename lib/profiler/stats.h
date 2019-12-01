@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "opslib.h"
+#include "logger.h"
 
 struct stat_mem_alloc {
         void *ptr;

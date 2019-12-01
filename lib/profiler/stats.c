@@ -55,6 +55,26 @@ void __append_fd(){
 	stats_fd_head = new_fd;
 }
 
+/* Log pointers that are not freed */
+void __log_alloc(){
+        struct stat_mem_alloc *cur = stats_mem_head;
+	char buf[256];
+	sprintf(buf, "ptr\t\t\t| malloc:\t| calloc:\t| realloc:\t| last allocated size:\t| total freed:\t|\n");
+	log_stats(buf);
+	sprintf(buf, "----------------------- |-------------- |-------------- |-------------- |---------------------- |--------------- \n");
+	log_stats(buf);
+        while(cur != NULL){
+                if (cur->last_size != cur->free_size){
+			sprintf(buf, "%p\t\t| %ld\t\t| %ldx%ld\t\t| %ld\t\t| %ld\t\t\t| %ld\t\t|\n",
+					cur->ptr, cur->malloc_size, cur->calloc_nmemb, cur->calloc_size, cur->realloc_size, cur->last_size, cur->free_size);
+			log_stats(buf);
+		}
+                cur = cur->next;
+        }
+	sprintf(buf, "\n");
+	log_stats(buf);
+}
+
 void stats_malloc(void *ptr, size_t size){
 	if (!ptr)
 		return;
@@ -109,6 +129,7 @@ void stats_free(void *ptr){
 		free_count += mem->last_size;
 		mem->free_size += mem->last_size;
 	}
+	__log_alloc();
 }
 
 void stats_open(int fd){

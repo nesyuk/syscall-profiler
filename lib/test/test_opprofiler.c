@@ -32,13 +32,13 @@ static void run_tests(int syscalls_num){
         printf("Tests *alloc:\n");
         print_headline_separator();
 
-	test_alloc();
+	//test_alloc();
 
 	print_headline_separator();
         printf("Tests fd:\n");
         print_headline_separator();
 
-	test_fd();
+	//test_fd();
 
 	srand(time(0));
         int const num_of_syscalls = (syscalls_num >= 0) ? syscalls_num : get_rand(MIN_NUM_SYSCALLS, MAX_NUM_SYSCALLS);

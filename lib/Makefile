@@ -36,7 +36,10 @@ logger.o:	$(LIB_DIR)/logger.c $(LIB_DIR)/logger.h
 	$(CC) $(CFLAGS) $(LIB_DIR)/logger.c -o $(TARGET_DIR)/logger.o
 
 .PHONY: test
-test:	test_install test_run test_clean
+test:	test_prepare test_install test_run test_clean
+
+test_prepare:
+	-echo "" > $(LOGS_DIR)/stats_log.log
 
 test_install:
 	$(CC) $(TEST_DIR)/test_opprofiler.c -o $(TEST_DIR)/testopprofiler
