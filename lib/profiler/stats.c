@@ -7,7 +7,7 @@ static unsigned long long fd_open = 0;
 static unsigned long long fd_close = 0;
 static struct stat_fd *stats_fd_head;
 
-struct stat_mem_alloc* find_mem(void *ptr){
+struct stat_mem_alloc* __find_mem(void *ptr){
 	struct stat_mem_alloc *cur = stats_mem_head;
 	while(cur != NULL){
 		if (cur->ptr == ptr)
@@ -17,7 +17,7 @@ struct stat_mem_alloc* find_mem(void *ptr){
         return false;
 }
 
-struct stat_fd* find_fd(int fd){
+struct stat_fd* __find_fd(int fd){
         struct stat_fd *cur = stats_fd_head;
         while(cur != NULL){
                 if (cur->fd == fd)
@@ -27,7 +27,7 @@ struct stat_fd* find_fd(int fd){
         return false;
 }
 
-void append_mem(){
+void __append_mem(){
 	if (!stats_mem_head){
 		stats_mem_head = __malloc(sizeof(struct stat_mem_alloc));
 		stats_mem_head->next = NULL;
@@ -37,7 +37,7 @@ void append_mem(){
 	stats_mem_head = mem;
 }
 
-void append_fd(){
+void __append_fd(){
 	if (!stats_fd_head){
 		stats_fd_head = __malloc(sizeof(struct stat_fd));
 		stats_fd_head->next = NULL;
@@ -55,20 +55,20 @@ void append_fd(){
 	stats_fd_head = new_fd;
 }
 
-void stats_add_malloc(void *ptr, size_t size){
+void stats_malloc(void *ptr, size_t size){
 	if (!ptr)
 		return;
-	append_mem();
+	__append_mem();
 	stats_mem_head->ptr = ptr;
 	stats_mem_head->malloc_size = size;
 	stats_mem_head->last_size = size;
 	alloc_count += size;
 }
 
-void stats_add_calloc(void *ptr, size_t nmemb, size_t size){
+void stats_calloc(void *ptr, size_t nmemb, size_t size){
 	if (!ptr)
 		return;
-	append_mem();
+	__append_mem();
 	stats_mem_head->ptr = ptr;
 	stats_mem_head->calloc_size = size;
 	stats_mem_head->calloc_nmemb = nmemb;
@@ -76,10 +76,10 @@ void stats_add_calloc(void *ptr, size_t nmemb, size_t size){
 	alloc_count += size;
 }
 
-void stats_add_realloc(void *prev, void *cur, size_t size){
+void stats_realloc(void *prev, void *cur, size_t size){
 	if(!prev || !cur)
 		return;
-	struct stat_mem_alloc *prev_mem = find_mem(prev);
+	struct stat_mem_alloc *prev_mem = __find_mem(prev);
 	if(prev_mem){
 		prev_mem->free_size += prev_mem->last_size;
 		free_count += prev_mem->last_size;
@@ -94,7 +94,7 @@ void stats_add_realloc(void *prev, void *cur, size_t size){
 	}
 	if (prev != cur){
 		// add new ptr
-		append_mem();
+		__append_mem();
 		stats_mem_head->realloc_size += size;
 		stats_mem_head->last_size = size;
 		stats_mem_head->ptr = cur;
@@ -104,7 +104,7 @@ void stats_add_realloc(void *prev, void *cur, size_t size){
 void stats_free(void *ptr){
 	if (!ptr)
 		return;
-	struct stat_mem_alloc *mem = find_mem(ptr);
+	struct stat_mem_alloc *mem = __find_mem(ptr);
 	if(mem){
 		free_count += mem->last_size;
 		mem->free_size += mem->last_size;
@@ -114,11 +114,11 @@ void stats_free(void *ptr){
 void stats_open(int fd){
 	if(fd < 0)
 		return;
-	struct stat_fd *fd_stat = find_fd(fd);
+	struct stat_fd *fd_stat = __find_fd(fd);
 	if (fd_stat){
 		fd_stat->open += 1;
 	} else {
-		append_fd();
+		__append_fd();
 		stats_fd_head->open += 1;
 	}
 	fd_open += 1;
@@ -127,7 +127,7 @@ void stats_open(int fd){
 void stats_read(int fd, size_t size){
 	if(fd < 0)
 		return;
-	struct stat_fd *fd_stat = find_fd(fd);
+	struct stat_fd *fd_stat = __find_fd(fd);
 	if(fd_stat){
 		fd_stat->read += size;
 	}
@@ -136,7 +136,7 @@ void stats_read(int fd, size_t size){
 void stats_write(int fd, size_t size){
 	if(fd < 0)
 		return;
-	struct stat_fd *fd_stat = find_fd(fd);
+	struct stat_fd *fd_stat = __find_fd(fd);
 	if(fd_stat){
 		fd_stat->write += size;
 	}
@@ -145,10 +145,9 @@ void stats_write(int fd, size_t size){
 void stats_close(int fd){
 	if(fd < 0)
 		return;
-	struct stat_fd *fd_stat = find_fd(fd);
+	struct stat_fd *fd_stat = __find_fd(fd);
 	if(fd_stat){
 		fd_stat->close += 1;
 		fd_close += 1;
 	}
-
 }

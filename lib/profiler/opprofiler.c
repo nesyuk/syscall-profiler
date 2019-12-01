@@ -2,7 +2,7 @@
 
 void *malloc(size_t size){
 	void *ptr  = __malloc(size);
-	stats_add_malloc(ptr, size);
+	stats_malloc(ptr, size);
 	return ptr;
 }
 
@@ -13,13 +13,13 @@ void free(void *ptr){
 
 void *calloc(size_t nmemb, size_t size){
 	void *ptr = __calloc(nmemb, size);
-	stats_add_calloc(ptr, nmemb, size);
+	stats_calloc(ptr, nmemb, size);
 	return ptr;
 }
 
 void *realloc(void *ptr, size_t size){
 	void *realloc_ptr =  __realloc(ptr, size);
-	stats_add_realloc(ptr, realloc_ptr, size);
+	stats_realloc(ptr, realloc_ptr, size);
 	return realloc_ptr;
 }
 
