@@ -8,6 +8,7 @@ TARGET_DIR := lib
 TARGET_LIB_SONAME := libopprofiler.so.1
 TARGET_LIB := $(TARGET_LIB_SONAME).0.1
 TEST_DIR := test
+LOGS_DIR := logs
 
 .PHONY: all
 
@@ -18,14 +19,22 @@ lib:	clean pre_install install
 
 pre_install:
 	mkdir -p $(TARGET_DIR)
+	mkdir -p $(LOGS_DIR)
 
-install:	install_stats $(LIB_DIR)/opslib.c $(LIB_DIR)/opslib.h $(LIB_DIR)/opprofiler.c $(LIB_DIR)/opprofiler.h
-	$(CC) $(CFLAGS) $(LIB_DIR)/opslib.c -o $(TARGET_DIR)/opslib.o
-	$(CC) $(CFLAGS) $(LIB_DIR)/opprofiler.c -o $(TARGET_DIR)/opprofiler.o
+install:	install_stats opslib.o opprofiler.o logger.o
 
 install_stats:	$(LIB_DIR)/stats.c $(LIB_DIR)/stats.h $(LIB_DIR)/stats_mem.c $(LIB_DIR)/stats_mem.h
 	$(CC) $(CFLAGS) $(LIB_DIR)/stats.c -o $(TARGET_DIR)/stats.o
 	$(CC) $(CFLAGS) $(LIB_DIR)/stats_mem.c -o $(TARGET_DIR)/stats_mem.o
+
+opprofiler.o:	$(LIB_DIR)/opprofiler.c $(LIB_DIR)/opprofiler.h
+	$(CC) $(CFLAGS) $(LIB_DIR)/opprofiler.c -o $(TARGET_DIR)/opprofiler.o
+
+opslib.o:	$(LIB_DIR)/opslib.c $(LIB_DIR)/opslib.h
+	$(CC) $(CFLAGS) $(LIB_DIR)/opslib.c -o $(TARGET_DIR)/opslib.o
+
+logger.o:	$(LIB_DIR)/logger.c $(LIB_DIR)/logger.h
+	$(CC) $(CFLAGS) $(LIB_DIR)/logger.c -o $(TARGET_DIR)/logger.o
 
 .PHONY: test
 test:	test_install test_run test_clean
