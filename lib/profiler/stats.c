@@ -64,7 +64,7 @@ void __log_alloc(){
 	sprintf(buf, "----------------------- |-------------- |-------------- |-------------- |---------------------- |--------------- \n");
 	log_stats(buf);
         while(cur != NULL){
-                if (cur->last_size != cur->free_size){
+                if ((cur->malloc_size + (cur->calloc_size * cur->calloc_nmemb) + cur->realloc_size) != cur->free_size){
 			sprintf(buf, "%p\t\t| %ld\t\t| %ldx%ld\t\t| %ld\t\t| %ld\t\t\t| %ld\t\t|\n",
 					cur->ptr, cur->malloc_size, cur->calloc_nmemb, cur->calloc_size, cur->realloc_size, cur->last_size, cur->free_size);
 			log_stats(buf);
@@ -110,8 +110,8 @@ void stats_calloc(void *ptr, size_t nmemb, size_t size){
 	stats_mem_head->ptr = ptr;
 	stats_mem_head->calloc_size = size;
 	stats_mem_head->calloc_nmemb = nmemb;
-	stats_mem_head->last_size = size;
-	alloc_count += size;
+	stats_mem_head->last_size = size*nmemb;
+	alloc_count += size*nmemb;
 }
 
 void stats_realloc(void *prev, void *cur, size_t size){
