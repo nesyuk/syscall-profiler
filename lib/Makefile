@@ -1,27 +1,45 @@
 SHELL = /bin/sh
 
 CC := gcc
+CFLAGS := -c -fPIC -Wall
 LDFLAGS := -shared -fPIC -ldl -Wl,-soname,
 LIB_DIR := profiler
-LD_DIR := /usr/local/lib
-TARGET_DIR := $(LD_DIR)/opprofiler
+TARGET_DIR := lib
 TARGET_LIB_SONAME := libopprofiler.so.1
 TARGET_LIB := $(TARGET_LIB_SONAME).0.1
 TEST_DIR := test
+LOGS_DIR := logs
 
 .PHONY: all
 
-all:	clean lib install
+all:	lib
 
-lib:	$(LIB_DIR)/opprofiler.c $(LIB_DIR)/opprofiler.h
+lib:	clean pre_install install
+	$(CC) $(TARGET_DIR)/*.o $(LDFLAGS)$(TARGET_LIB_SONAME) -o $(TARGET_DIR)/$(TARGET_LIB)
+
+pre_install:
 	mkdir -p $(TARGET_DIR)
-	$(CC) $(LIB_DIR)/opprofiler.c $(LDFLAGS)$(TARGET_LIB_SONAME) -o $(TARGET_DIR)/$(TARGET_LIB)
+	mkdir -p $(LOGS_DIR)
 
-install:	$(TARGET_DIR)/$(TARGET_LIB)
-	ldconfig -n $(TARGET_DIR)
+install:	install_stats opslib.o opprofiler.o logger.o
+
+install_stats:	$(LIB_DIR)/stats.c $(LIB_DIR)/stats.h
+	$(CC) $(CFLAGS) $(LIB_DIR)/stats.c -o $(TARGET_DIR)/stats.o
+
+opprofiler.o:	$(LIB_DIR)/opprofiler.c $(LIB_DIR)/opprofiler.h
+	$(CC) $(CFLAGS) $(LIB_DIR)/opprofiler.c -o $(TARGET_DIR)/opprofiler.o
+
+opslib.o:	$(LIB_DIR)/opslib.c $(LIB_DIR)/opslib.h
+	$(CC) $(CFLAGS) $(LIB_DIR)/opslib.c -o $(TARGET_DIR)/opslib.o
+
+logger.o:	$(LIB_DIR)/logger.c $(LIB_DIR)/logger.h
+	$(CC) $(CFLAGS) $(LIB_DIR)/logger.c -o $(TARGET_DIR)/logger.o
 
 .PHONY: test
-test:	test_install test_run test_clean
+test:	test_prepare test_install test_run test_clean
+
+test_prepare:
+	-echo "" > $(LOGS_DIR)/stats_log.log
 
 test_install:
 	$(CC) $(TEST_DIR)/test_opprofiler.c -o $(TEST_DIR)/testopprofiler
