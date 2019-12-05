@@ -1,11 +1,38 @@
 #include "stats.h"
 
+/* Statistics of memory allocation:
+ *
+ * free_count: total amount of freed memory
+ * alloc_count: total amount of allocated memory
+ * stats_mem_head: sums of allocated memory per each
+ * 		   memory allocation method: malloc, calloc, realloc,
+ * 		   size of last allocated memory, etc... per pointer
+ * stats_mem_overhead: total amount of allocated memory for storing memory 
+ * 		       allocation statistics: sizeof(free_count) + 
+ * 		       sizeof(alloc_count) + self (sizeof(stats_mem_overhead)) + 
+ * 		       ntimes * sizeof(stat_mem_alloc)
+ */
 static unsigned long long free_count = 0;
 static unsigned long long alloc_count  = 0;
 static struct stat_mem_alloc *stats_mem_head;
+static unsigned long long stats_mem_overhead = sizeof(unsigned long long)*3;
+
+
+/* Statistics of file operations:
+ *
+ * fd_open: total time open() was called on file descriptor
+ * fd_close: total time close() was called on file descriptor
+ * stats_fd_head: total amount of operations open(), close(),
+ * 		  read() and write() per file descriptor.
+ * stats_fd_overhead: total amount of allocated memory for
+ * 		      file descriptor statistics: sizeof(fd_open) + 
+ * 		      sizeof(fd_close) + self (sizeof(stats_fd_overhead)) + 
+ * 		      ntimes * sizeof(stats_fd_head)
+ */
 static unsigned long long fd_open = 0;
 static unsigned long long fd_close = 0;
 static struct stat_fd *stats_fd_head;
+static unsigned long long stats_fd_overhead = sizeof(unsigned long long)*3;
 
 struct stat_mem_alloc* __find_mem(void *ptr){
 	struct stat_mem_alloc *cur = stats_mem_head;
@@ -31,10 +58,12 @@ void __append_mem(){
 	if (!stats_mem_head){
 		stats_mem_head = __malloc(sizeof(struct stat_mem_alloc));
 		stats_mem_head->next = NULL;
+		stats_mem_overhead += sizeof(struct stat_mem_alloc);
 	}
 	struct stat_mem_alloc *mem = __malloc(sizeof(struct stat_mem_alloc));
 	mem->next = stats_mem_head;
 	stats_mem_head = mem;
+	stats_mem_overhead += sizeof(struct stat_mem_alloc);
 }
 
 void __append_fd(){
@@ -45,6 +74,7 @@ void __append_fd(){
 		stats_fd_head->read = 0;
 		stats_fd_head->write = 0;
 		stats_fd_head->close = 0;
+		stats_fd_overhead += sizeof(struct stat_fd);
 	}
 	struct stat_fd *new_fd = __malloc(sizeof(struct stat_fd));
 	new_fd->next = stats_fd_head;
@@ -53,9 +83,12 @@ void __append_fd(){
 	new_fd->write = 0;
 	new_fd->close = 0;
 	stats_fd_head = new_fd;
+	stats_fd_overhead += sizeof(struct stat_fd);
 }
 
-/* Log pointers that are not freed */
+/* 
+ * Log pointers that are not freed 
+ */
 void __log_alloc(){
         struct stat_mem_alloc *cur = stats_mem_head;
 	char buf[256];
@@ -71,10 +104,13 @@ void __log_alloc(){
 		}
                 cur = cur->next;
         }
-	sprintf(buf, "\n");
+	sprintf(buf, "---------------------\noverhead: %lld (bytes)\ntotal overhead: %lld (bytes)\n\n", stats_mem_overhead, stats_mem_overhead+stats_fd_overhead);
 	log_stats(buf);
 }
 
+/* 
+ * Log file descriptors that are not closed 
+ */
 void __log_fd(){
 	struct stat_fd *cur = stats_fd_head;
 	char buf[256];
@@ -89,7 +125,7 @@ void __log_fd(){
 		}
 		cur = cur->next;
 	}
-	sprintf(buf, "\n");
+	sprintf(buf, "---------------------\noverhead: %lld (bytes)\ntotal overhead: %lld (bytes)\n\n", stats_fd_overhead, stats_mem_overhead+stats_fd_overhead);
 	log_stats(buf);
 }
 
