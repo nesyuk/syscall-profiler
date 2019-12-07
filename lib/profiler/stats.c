@@ -1,5 +1,8 @@
 #include "stats.h"
 
+static int bytesToKb = 1024;
+static char buf[256];
+
 /* Statistics of memory allocation:
  *
  * free_count: total amount of freed memory
@@ -91,20 +94,19 @@ void __append_fd(){
  */
 void __log_alloc(){
         struct stat_mem_alloc *cur = stats_mem_head;
-	char buf[256];
-	sprintf(buf, "ptr\t\t\t| malloc:\t| calloc:\t| realloc:\t| last allocated size:\t| total freed:\t|\n");
+	sprintf(buf, "Total allocated memory: %lld bytes (~%lldKB)\nTotal freed memory: %lld bytes (~%lldKB)\nTotal overhead: %lld bytes (~%lldKB)\n\nAllocated memory info per pointer:\n\n", alloc_count, alloc_count/bytesToKb, free_count, free_count/bytesToKb, stats_mem_overhead, stats_mem_overhead/bytesToKb);
 	log_stats(buf);
-	sprintf(buf, "----------------------- |-------------- |-------------- |-------------- |---------------------- |--------------- \n");
+	sprintf(buf, "| ptr:%10s | malloc (bytes):%5s | calloc (nmemb x bytes):%20s | realloc (bytes):%4s | last size (bytes):%2s | total free (bytes):%1s |\n", "", "", "", "", "", "");
 	log_stats(buf);
         while(cur != NULL){
                 if ((cur->malloc_size + (cur->calloc_size * cur->calloc_nmemb) + cur->realloc_size) != cur->free_size){
-			sprintf(buf, "%p\t\t| %ld\t\t| %ldx%ld\t\t| %ld\t\t| %ld\t\t\t| %ld\t\t|\n",
-					cur->ptr, cur->malloc_size, cur->calloc_nmemb, cur->calloc_size, cur->realloc_size, cur->last_size, cur->free_size);
+			sprintf(buf, "| %p | %20ld | %20ld x %20ld | %20ld | %20ld | %20ld |\n",
+					cur->ptr, cur->malloc_size, cur->calloc_size, cur->calloc_nmemb, cur->realloc_size, cur->last_size, cur->free_size);
 			log_stats(buf);
 		}
                 cur = cur->next;
         }
-	sprintf(buf, "---------------------\noverhead: %lld (bytes)\ntotal overhead: %lld (bytes)\n\n", stats_mem_overhead, stats_mem_overhead+stats_fd_overhead);
+	sprintf(buf, "\n\n");
 	log_stats(buf);
 }
 
@@ -113,19 +115,19 @@ void __log_alloc(){
  */
 void __log_fd(){
 	struct stat_fd *cur = stats_fd_head;
-	char buf[256];
-	sprintf(buf, "fd:\t| open (times)\t| read (bytes)\t| write (bytes)\t| close(times)\t|\n");
+	sprintf(buf, "Total open(): %lld times\nTotal close(): %lld times\nTotal overhead: %lld bytes (~%lldKB)\n\nFile operations info per file descriptor:\n\n",
+			fd_open, fd_close, stats_fd_overhead, stats_fd_overhead/bytesToKb);
 	log_stats(buf);
-	sprintf(buf, "------- |-------------- |-------------- |-------------- |-------------- |\n");
+	sprintf(buf, "| file descriptor #: %2s| open (times):%7s | read (bytes):%7s | write (bytes):%6s | close (times):%6s |\n", "", "", "", "", "");
 	log_stats(buf);
 	while(cur != NULL){
 		if(cur->open != cur->close){
-			sprintf(buf, "%d\t| %ld\t\t| %lld\t\t| %lld\t\t| %ld\t\t|\n", cur->fd, cur->open, cur->read, cur->write, cur->close);
+			sprintf(buf, "| %20d | %20ld | %20lld | %20lld | %20ld |\n", cur->fd, cur->open, cur->read, cur->write, cur->close);
 			log_stats(buf);
 		}
 		cur = cur->next;
 	}
-	sprintf(buf, "---------------------\noverhead: %lld (bytes)\ntotal overhead: %lld (bytes)\n\n", stats_fd_overhead, stats_mem_overhead+stats_fd_overhead);
+	sprintf(buf, "\n\n");
 	log_stats(buf);
 }
 
@@ -226,5 +228,6 @@ void stats_close(int fd){
 		fd_stat->close += 1;
 		fd_close += 1;
 	}
-	__log_fd();
+	if(fd_open != fd_close)
+		__log_fd();
 }
