@@ -61,11 +61,23 @@ void __append_mem(){
 	if (!stats_mem_head){
 		stats_mem_head = __malloc(sizeof(struct stat_mem_alloc));
 		stats_mem_head->next = NULL;
+		stats_mem_head->malloc_size = 0;
+		stats_mem_head->calloc_size = 0;
+		stats_mem_head->calloc_nmemb = 0;
+		stats_mem_head->realloc_size = 0;
+		stats_mem_head->last_size = 0;
+		stats_mem_head->free_size = 0;
 		stats_mem_overhead += sizeof(struct stat_mem_alloc);
 	}
 	struct stat_mem_alloc *mem = __malloc(sizeof(struct stat_mem_alloc));
 	mem->next = stats_mem_head;
 	stats_mem_head = mem;
+	mem->malloc_size = 0;
+	mem->calloc_size = 0;
+	mem->calloc_nmemb = 0;
+	mem->realloc_size = 0;
+	mem->last_size = 0;
+	mem->free_size = 0;
 	stats_mem_overhead += sizeof(struct stat_mem_alloc);
 }
 
