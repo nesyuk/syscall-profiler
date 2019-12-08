@@ -9,7 +9,7 @@
 #define LOGS_DIR "logs"
 #define STATS_FILE "stats_log.log"
 #define ERROR_FILE "errors.log"
-#define LOG_FILE "oplog.log"
+#define LOG_FILE "syscalls.log"
 #define FILE_PRIV 0667
 
 void log_stats(const char *msg);

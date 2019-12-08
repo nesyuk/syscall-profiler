@@ -21,7 +21,7 @@ pre_install:
 	mkdir -p $(TARGET_DIR)
 	mkdir -p $(LOGS_DIR)
 
-install:	install_stats opslib.o opprofiler.o logger.o
+install:	install_stats opslib.o opprofiler.o opslogger.o logger.o
 
 install_stats:	$(LIB_DIR)/stats.c $(LIB_DIR)/stats.h
 	$(CC) $(CFLAGS) $(LIB_DIR)/stats.c -o $(TARGET_DIR)/stats.o
@@ -35,11 +35,15 @@ opslib.o:	$(LIB_DIR)/opslib.c $(LIB_DIR)/opslib.h
 logger.o:	$(LIB_DIR)/logger.c $(LIB_DIR)/logger.h
 	$(CC) $(CFLAGS) $(LIB_DIR)/logger.c -o $(TARGET_DIR)/logger.o
 
+opslogger.o:	$(LIB_DIR)/opslogger.c $(LIB_DIR)/opslogger.h
+	$(CC) $(CFLAGS) $(LIB_DIR)/opslogger.c -o $(TARGET_DIR)/opslogger.o
+
 .PHONY: test
 test:	test_prepare test_install test_run test_clean
 
 test_prepare:
 	-echo "" > $(LOGS_DIR)/stats_log.log
+	-echo "" > $(LOGS_DIR)/syscalls.log
 
 test_install:
 	$(CC) $(TEST_DIR)/test_opprofiler.c -o $(TEST_DIR)/testopprofiler
