@@ -5,6 +5,7 @@
 
 #include "opslib.h"
 #include "logger.h"
+#include "opsconfig.h"
 
 struct stat_mem_alloc {
         void *ptr;
