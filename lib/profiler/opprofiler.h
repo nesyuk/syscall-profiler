@@ -12,5 +12,6 @@
 #include "opslib.h"
 #include "stats.h"
 #include "opslogger.h"
+#include "opsconfig.h"
 
 #endif
