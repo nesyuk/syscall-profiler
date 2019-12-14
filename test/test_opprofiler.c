@@ -183,6 +183,10 @@ static bool test_read(void){
 
 	size_t const buf_size = get_rand(MIN_BUF_SIZE, MAX_BUF_SIZE);
 	char buf[buf_size];
+
+	// set file cursor to position 0
+	lseek(opened_files_list[opened_files_count-1], 0, SEEK_SET);
+
 	size_t bytes = read(opened_files_list[opened_files_count-1], buf, buf_size);
 	printf("Read %ld bytes (buf size: %ld) from file with fd: %d\nbuf:%s\n", bytes, buf_size, opened_files_list[opened_files_count-1], buf);
 	print_line_separator();
