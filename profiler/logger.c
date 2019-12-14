@@ -6,10 +6,10 @@ void __log(const char *path, const char *msg){
 	__close(fd);
 }
 
-bool __is_valid_filename(const char *filename, const char *msg, const char *filetype){
+bool __is_valid_filename(const char *filename, const char *filetype){
 	if (filename == NULL || filename[0] == '\0'){
 		char error_buf[256];
-                sprintf(error_buf, "Failed to write a message: %s. Reason: empty %s file name\n", filetype, msg);
+                sprintf(error_buf, "Failed to write a message. Reason: empty filename for filetype: %s\n", filetype);
                 log_error(error_buf);
 		return false;
 	}
@@ -17,17 +17,21 @@ bool __is_valid_filename(const char *filename, const char *msg, const char *file
 }
 
 void log_stats(const char *msg){
-	char *filename = get_stats_filename();
-	if(__is_valid_filename(filename, msg, "stats"))
+	char filename[MAX_FILENAME_LEN] = "";
+	set_stats_filename(filename);
+	if(__is_valid_filename(filename, "stats"))
 		__log(filename, msg);
 }
 
 void log_error(const char *msg){
-        __log(get_error_filename(), msg);
+	char filename[MAX_FILENAME_LEN] = "";
+	set_error_filename(filename);
+        __log(filename, msg);
 }
 
 void log_msg(const char *msg){
-	char *filename = get_log_filename();
-	if(__is_valid_filename(filename, msg, "log"))
-		__log(get_log_filename(), msg);
+	char filename[MAX_FILENAME_LEN] = "";
+	set_log_filename(filename);
+	if(__is_valid_filename(filename, "log"))
+		__log(filename, msg);
 }
