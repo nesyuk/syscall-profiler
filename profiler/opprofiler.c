@@ -5,6 +5,8 @@ void *malloc(size_t size){
 		log_malloc(size);
 
 	void *ptr  = __malloc(size);
+	if (ptr == NULL)
+		log_mem_error("malloc", size);
 
 	if(log_memory_usage())
 		stats_malloc(ptr, size);
@@ -27,6 +29,8 @@ void *calloc(size_t nmemb, size_t size){
 		log_calloc(nmemb, size);
 
 	void *ptr = __calloc(nmemb, size);
+	if (ptr == NULL)
+		log_mem_error("calloc", nmemb*size);
 
 	if(log_memory_usage())
 		stats_calloc(ptr, nmemb, size);
@@ -38,7 +42,12 @@ void *realloc(void *ptr, size_t size){
 	if(log_syscall())
 		log_realloc(ptr, size);
 
+	if (ptr == NULL)
+		log_mem_error("realloc (ptr)", size);
+
 	void *realloc_ptr =  __realloc(ptr, size);
+	if (realloc_ptr == NULL)
+		log_mem_error("realloc", size);
 
 	if(log_memory_usage())
 		stats_realloc(ptr, realloc_ptr, size);
@@ -58,6 +67,9 @@ int open(const char *pathname, int flags, ...){
 		log_open(pathname, flags, mode);
 
 	int fd = __open(pathname, flags, mode);
+	if (fd == -1)
+		log_fd_error("open", fd);
+
 	stats_open(fd);
 	return fd;
 }
@@ -67,7 +79,9 @@ int close(int fd){
 		log_close(fd);
 
 	int result =  __close(fd);
-	//TODO: log error if result != 0
+	if (result == -1)
+		log_fd_error("close", fd);
+
 	if(log_file_usage())
 		stats_close(fd);
 	return result;
@@ -78,6 +92,8 @@ ssize_t read(int fd, void *buf, size_t count){
 		log_read(fd, buf, count);
 
 	size_t bytes = __read(fd, buf, count);
+	if (bytes == -1)
+		log_fd_error("read", fd);
 
 	if(log_file_usage())
 		stats_read(fd, bytes);
@@ -90,6 +106,8 @@ ssize_t write(int fd, const void *buf, size_t count){
 		log_write(fd, buf, count);
 
 	size_t bytes = __write(fd, buf, count);
+	if (bytes == -1)
+		log_fd_error("write", fd);
 
 	if(log_file_usage())
 		stats_write(fd, bytes);

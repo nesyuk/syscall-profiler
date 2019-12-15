@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <sys/time.h>
+#include <errno.h>
 
 #include "logger.h"
 
@@ -16,5 +17,7 @@ void log_open(const char *pathname, int flags, mode_t mode);
 void log_close(int fd);
 void log_read(int fd, void *buf, size_t count);
 void log_write(int fd, const void *buf, size_t count);
+void log_fd_error(const char *op, int fd);
+void log_mem_error(const char *op, size_t size);
 
 #endif

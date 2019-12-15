@@ -32,6 +32,18 @@ void __log_syscall(const char *syscall, const char *args){
         log_msg(buf);
 }
 
+void log_fd_error(const char *op, int fd){
+        char msg[64];
+        sprintf(msg, "File operation: %s failed on file with fd: %d. Errno: %d\n", op, fd, errno);
+        log_error(msg);
+}
+
+void log_mem_error(const char *op, size_t size){
+        char msg[128];
+        sprintf(msg, "Memory allocation: %s failed for size: %ld. Errno: %d\n", op, size, errno);
+        log_error(msg);
+}
+
 void log_malloc(size_t size){
 	sprintf(args, "size: %ld", size);
 	__log_syscall("malloc", args);
