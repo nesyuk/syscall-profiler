@@ -1,9 +1,9 @@
 #ifndef SYSCALL_OPS_LOGGER
 #define SYSCALL_OPS_LOGGER
 
+#include <errno.h>
 #include <stdbool.h>
 #include <sys/time.h>
-#include <errno.h>
 
 #include "logger.h"
 

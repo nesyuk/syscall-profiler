@@ -2,16 +2,16 @@
 #define OP_PROFILER
 
 #define _GNU_SOURCE
-#include <stdio.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <stdarg.h>
 #include <dlfcn.h>
+#include <fcntl.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
-#include "opslib.h"
-#include "stats.h"
-#include "opslogger.h"
 #include "opsconfig.h"
+#include "opslib.h"
+#include "opslogger.h"
+#include "stats.h"
 
 #endif

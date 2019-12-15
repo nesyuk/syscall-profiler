@@ -2,8 +2,8 @@
 #define OPS_LIB_PROFILER
 
 #define _GNU_SOURCE
-#include <fcntl.h>
 #include <dlfcn.h>
+#include <fcntl.h>
 #include <unistd.h>
 
 void *__malloc(size_t size);

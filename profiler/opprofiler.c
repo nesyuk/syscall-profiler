@@ -1,116 +1,116 @@
 #include "opprofiler.h"
 
-void *malloc(size_t size){
-	if (log_syscall())
-		log_malloc(size);
+void *malloc(size_t size) {
+  if (log_syscall())
+    log_malloc(size);
 
-	void *ptr  = __malloc(size);
-	if (ptr == NULL)
-		log_mem_error("malloc", size);
+  void *ptr = __malloc(size);
+  if (ptr == NULL)
+    log_mem_error("malloc", size);
 
-	if(log_memory_usage())
-		stats_malloc(ptr, size);
+  if (log_memory_usage())
+    stats_malloc(ptr, size);
 
-	return ptr;
+  return ptr;
 }
 
-void free(void *ptr){
-	if(log_syscall())
-		log_free(ptr);
+void free(void *ptr) {
+  if (log_syscall())
+    log_free(ptr);
 
-	if(log_memory_usage())
-		stats_free(ptr);
+  if (log_memory_usage())
+    stats_free(ptr);
 
-	__free(ptr);
+  __free(ptr);
 }
 
-void *calloc(size_t nmemb, size_t size){
-	if(log_syscall())
-		log_calloc(nmemb, size);
+void *calloc(size_t nmemb, size_t size) {
+  if (log_syscall())
+    log_calloc(nmemb, size);
 
-	void *ptr = __calloc(nmemb, size);
-	if (ptr == NULL)
-		log_mem_error("calloc", nmemb*size);
+  void *ptr = __calloc(nmemb, size);
+  if (ptr == NULL)
+    log_mem_error("calloc", nmemb * size);
 
-	if(log_memory_usage())
-		stats_calloc(ptr, nmemb, size);
+  if (log_memory_usage())
+    stats_calloc(ptr, nmemb, size);
 
-	return ptr;
+  return ptr;
 }
 
-void *realloc(void *ptr, size_t size){
-	if(log_syscall())
-		log_realloc(ptr, size);
+void *realloc(void *ptr, size_t size) {
+  if (log_syscall())
+    log_realloc(ptr, size);
 
-	if (ptr == NULL)
-		log_mem_error("realloc (ptr)", size);
+  if (ptr == NULL)
+    log_mem_error("realloc (ptr)", size);
 
-	void *realloc_ptr =  __realloc(ptr, size);
-	if (realloc_ptr == NULL)
-		log_mem_error("realloc", size);
+  void *realloc_ptr = __realloc(ptr, size);
+  if (realloc_ptr == NULL)
+    log_mem_error("realloc", size);
 
-	if(log_memory_usage())
-		stats_realloc(ptr, realloc_ptr, size);
+  if (log_memory_usage())
+    stats_realloc(ptr, realloc_ptr, size);
 
-	return realloc_ptr;
+  return realloc_ptr;
 }
 
-int open(const char *pathname, int flags, ...){
-	int mode = 0;
-	if (__OPEN_NEEDS_MODE (flags)){
-                va_list arg;
-                va_start (arg, flags);
-                mode = va_arg (arg, int);
-                va_end (arg);
-        }
-	if(log_syscall())
-		log_open(pathname, flags, mode);
+int open(const char *pathname, int flags, ...) {
+  int mode = 0;
+  if (__OPEN_NEEDS_MODE(flags)) {
+    va_list arg;
+    va_start(arg, flags);
+    mode = va_arg(arg, int);
+    va_end(arg);
+  }
+  if (log_syscall())
+    log_open(pathname, flags, mode);
 
-	int fd = __open(pathname, flags, mode);
-	if (fd == -1)
-		log_fd_error("open", fd);
+  int fd = __open(pathname, flags, mode);
+  if (fd == -1)
+    log_fd_error("open", fd);
 
-	stats_open(fd);
-	return fd;
+  stats_open(fd);
+  return fd;
 }
 
-int close(int fd){
-	if(log_syscall())
-		log_close(fd);
+int close(int fd) {
+  if (log_syscall())
+    log_close(fd);
 
-	int result =  __close(fd);
-	if (result == -1)
-		log_fd_error("close", fd);
+  int result = __close(fd);
+  if (result == -1)
+    log_fd_error("close", fd);
 
-	if(log_file_usage())
-		stats_close(fd);
-	return result;
+  if (log_file_usage())
+    stats_close(fd);
+  return result;
 }
 
-ssize_t read(int fd, void *buf, size_t count){
-	if(log_syscall())
-		log_read(fd, buf, count);
+ssize_t read(int fd, void *buf, size_t count) {
+  if (log_syscall())
+    log_read(fd, buf, count);
 
-	size_t bytes = __read(fd, buf, count);
-	if (bytes == -1)
-		log_fd_error("read", fd);
+  size_t bytes = __read(fd, buf, count);
+  if (bytes == -1)
+    log_fd_error("read", fd);
 
-	if(log_file_usage())
-		stats_read(fd, bytes);
+  if (log_file_usage())
+    stats_read(fd, bytes);
 
-	return bytes;
+  return bytes;
 }
 
-ssize_t write(int fd, const void *buf, size_t count){
-	if(log_syscall())
-		log_write(fd, buf, count);
+ssize_t write(int fd, const void *buf, size_t count) {
+  if (log_syscall())
+    log_write(fd, buf, count);
 
-	size_t bytes = __write(fd, buf, count);
-	if (bytes == -1)
-		log_fd_error("write", fd);
+  size_t bytes = __write(fd, buf, count);
+  if (bytes == -1)
+    log_fd_error("write", fd);
 
-	if(log_file_usage())
-		stats_write(fd, bytes);
+  if (log_file_usage())
+    stats_write(fd, bytes);
 
-	return bytes;
+  return bytes;
 }
