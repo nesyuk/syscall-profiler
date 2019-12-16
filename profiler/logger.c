@@ -2,7 +2,7 @@
 
 void __log(const char *path, const char *msg) {
   int fd = __open(path, FILE_FLAGS, FILE_PRIV);
-  __write(fd, msg, strlen(msg) + 1);
+  __write(fd, msg, strlen(msg));
   __close(fd);
 }
 
